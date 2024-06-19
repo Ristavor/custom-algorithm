@@ -3,6 +3,7 @@ package org.algorithms.tolerance;
 import com.example.common.annotations.AlgorithmName;
 import com.example.common.model.IAlgorithm;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @AlgorithmName("ToleranceBasedFilter")
@@ -99,15 +100,22 @@ public class ToleranceBasedFilter implements IAlgorithm {
         for (double timestamp : result[0]) {
             resultString.append(timestamp).append(",");
         }
-        resultString.setLength(resultString.length() - 1); // Удаляем последний запятую
+        resultString.setLength(resultString.length() - 1); // Удаляем последнюю запятую
 
         resultString.append(" | TimeSeries:");
         for (double value : result[1]) {
             resultString.append(value).append(",");
         }
-        resultString.setLength(resultString.length() - 1); // Удаляем последний запятую
+        resultString.setLength(resultString.length() - 1); // Удаляем последнюю запятую
 
         return resultString.toString();
+    }
+
+    @Override
+    public Map<String, String> getParameters() {
+        Map<String, String> params = new HashMap<>();
+        params.put("tolerance", "Tolerance value for filtering");
+        return params;
     }
 
     // Геттеры и сеттеры
