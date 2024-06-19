@@ -1,0 +1,144 @@
+package org.algorithms.redundancy;
+
+import com.example.common.annotations.AlgorithmName;
+import com.example.common.model.IAlgorithm;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@AlgorithmName("ZeroOrderExtrapolator")
+public class ZeroOrderExtrapolator implements IAlgorithm {
+    private double[] timeStamps;
+    private double[] timeSeries;
+    private double tolerance;
+
+    public ZeroOrderExtrapolator(double[] timeStamps, double[] timeSeries, double tolerance) {
+        this.timeStamps = timeStamps;
+        this.timeSeries = timeSeries;
+        this.tolerance = tolerance;
+    }
+
+    public ZeroOrderExtrapolator() {
+    }
+
+    public double[][] filter(){
+        if (timeStamps == null || timeSeries == null || timeStamps.length != timeSeries.length || timeStamps.length == 0) {
+            throw new IllegalArgumentException("Invalid input data.");
+        }
+
+        int n = timeStamps.length;
+        boolean[] valid = new boolean[n];
+        valid[0] = true; // The first measurement is always considered valid
+        double lastValidTimeSeries = timeSeries[0];
+
+        for (int i = 1; i < n; i++) {
+            if (lastValidTimeSeries - tolerance <= timeSeries[i] && timeSeries[i] <= lastValidTimeSeries + tolerance) {
+                valid[i] = false;
+            } else {
+                lastValidTimeSeries = timeSeries[i];
+                valid[i] = true;
+            }
+            valid[n - 1] = true;
+        }
+
+        // Collecting valid measurements
+        int validCount = 0;
+        for (boolean v : valid) {
+            if (v) validCount++;
+        }
+
+        double[] filteredTimeSeries = new double[validCount];
+        double[] filteredTimeStamps = new double[validCount];
+        int index = 0;
+        for (int i = 0; i < n; i++) {
+            if (valid[i]) {
+                filteredTimeSeries[index] = timeSeries[i];
+                filteredTimeStamps[index] = timeStamps[i];
+                index++;
+            }
+        }
+
+        double[][] filteredResults = new double[2][validCount];
+        filteredResults[0] = filteredTimeStamps;
+        filteredResults[1] = filteredTimeSeries;
+
+        return filteredResults;
+    }
+
+    @Override
+    public void setParameters(Map<String, String> parameters) {
+        if (parameters.containsKey("tolerance")) {
+            this.tolerance = Double.parseDouble(parameters.get("tolerance"));
+        }
+    }
+
+    @Override
+    public void setInput(String inputData) {
+        // Предполагаем, что inputData будет в формате "timestamps:timeSeries"
+        String[] parts = inputData.split(";");
+        String[] timestampStrings = parts[0].split(",");
+        String[] timeSeriesStrings = parts[1].split(",");
+
+        this.timeStamps = new double[timestampStrings.length];
+        this.timeSeries = new double[timeSeriesStrings.length];
+
+        for (int i = 0; i < timestampStrings.length; i++) {
+            this.timeStamps[i] = Double.parseDouble(timestampStrings[i]);
+        }
+
+        for (int i = 0; i < timeSeriesStrings.length; i++) {
+            this.timeSeries[i] = Double.parseDouble(timeSeriesStrings[i]);
+        }
+    }
+
+    @Override
+    public String solve() {
+        double[][] result = filter();
+        StringBuilder resultString = new StringBuilder();
+
+        resultString.append("Timestamps:");
+        for (double timestamp : result[0]) {
+            resultString.append(timestamp).append(",");
+        }
+        resultString.setLength(resultString.length() - 1); // Удаляем последнюю запятую
+
+        resultString.append(" | TimeSeries:");
+        for (double value : result[1]) {
+            resultString.append(value).append(",");
+        }
+        resultString.setLength(resultString.length() - 1); // Удаляем последнюю запятую
+
+        return resultString.toString();
+    }
+
+    @Override
+    public Map<String, String> getParameters() {
+        Map<String, String> params = new HashMap<>();
+        params.put("tolerance", "Tolerance value for filtering");
+        return params;
+    }
+
+    public double[] getTimeStamps() {
+        return timeStamps;
+    }
+
+    public double[] getTimeSeries() {
+        return timeSeries;
+    }
+
+    public double getTolerance() {
+        return tolerance;
+    }
+
+    public void setTimeSeries(double[] timeSeries) {
+        this.timeSeries = timeSeries;
+    }
+
+    public void setTimeStamps(double[] timeStamps) {
+        this.timeStamps = timeStamps;
+    }
+
+    public void setTolerance(double tolerance) {
+        this.tolerance = tolerance;
+    }
+}
