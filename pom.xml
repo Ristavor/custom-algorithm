@@ -8,6 +8,16 @@
     <artifactId>custom-algorithms</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>common</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/libs/common-1.0-SNAPSHOT.jar</systemPath>
+        </dependency>
+    </dependencies>
+
     <properties>
         <maven.compiler.source>22</maven.compiler.source>
         <maven.compiler.target>22</maven.compiler.target>
